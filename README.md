@@ -4,7 +4,6 @@
 - 📫 How to reach me : u/sinanthegenius(Reddit) 
 - 😄 Pronouns: he/him
 - ⚡ Fun fact: My PC is so old it, it has a built-in CD reader
-- This repo is where I keep my C projects.
 
 <!---
 sinan123-5/sinan123-5 is a ✨ special ✨ repository because its `README.md` (this file) appears on your GitHub profile.
