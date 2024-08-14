@@ -99,7 +99,7 @@ unsigned int calculateSize(FILE*data){
 // Function to check if the intended seperator is valid to use
 bool isValidSep(const char sep){
 	if(sep <= 32)return false; // Invalid if sep is an unpressable char
-	if(sep >= 48 && sep <= 56) return false; // Invalid if sep is a number
+	if(sep >= 48 && sep <= 57) return false; // Invalid if sep is a number
 	if(sep >= 65 && sep <= 90)return false; // Invalid if sep is a capital letter
 	if(sep >= 97 && sep <= 122)return false; // Invalid if sep is a non-capital letter
 	return true;
