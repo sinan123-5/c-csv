@@ -2,9 +2,10 @@
 #include<stdlib.h>
 #include<string.h>
 #include<stdbool.h>
+#include<ctype.h>
 
 // CSV File Structure
-struct csv {
+typedef struct csv {
 	// File name and related data
 	short unsigned int nameLen;
 	char* csvFile;
@@ -22,23 +23,23 @@ struct csv {
 	char* headers;
 	char* lines;
 	
-};
+} csv;
 
 // Function prototypes
 // Functions to prepare the csv struct
-int prepareCsv(struct csv* file, const char* name, const short unsigned int nameLen);
-int preReading(struct csv* file, const char sep, unsigned int headline);
+int prepareCsv(csv* file, const char* name, const short unsigned int nameLen);
+int preReading(csv* file, const char sep, unsigned int headline);
 	// Functions used in/for preReading
-	unsigned int calculateSize(FILE*data); // Calculates the file's size
-	bool isValidSep(const char sep); // Checks if the intended seperator is valid to use
+	unsigned int calculateSize(csv*file); // Calculates the file's size
+	unsigned int countLines(csv* file); // Counts the number of lines in pointed file
 /*preReading Err Codes
 * 1 : CSV file not prepared. prepareCsv was never called with a pointer pointing at this functions csv struct
 * 2 : File was not found. It either doesn't exist or another problem has occured
-* 3 : Invalid seperator. Seperator can't be a number or a letter.
+* 3 : Invalid seperator. Seperator can only be a punctuation character
 */
 
 int main(){
-	struct csv myCsv; // Sample Structure
+	csv myCsv; // Sample Structure
 	
 	printf("%i\n", prepareCsv(&myCsv, "myData.csv", 10)); // Sample csv file
 	printf("%i, %s\n", myCsv.nameLen, myCsv.csvFile); // Test log if changes are applied
@@ -46,10 +47,12 @@ int main(){
 	// Test log for preReading
 	preReading(&myCsv, ';', 0);
 	printf("This CSV file is %lu bytes/characters long!\n", myCsv.size);
+	printf("CSV is %i lines long.\n", myCsv.lineNum + 1);
+	printf("preRead exit status : %i\n", preReading(&myCsv, ';', 0)); // Check for any errors
 }
 
 // Function to write the csv file's name into the pointed csv struct
-int prepareCsv(struct csv* file, const char* name, const short unsigned int nameLen){
+int prepareCsv(csv* file, const char* name, const short unsigned int nameLen){
 	file->nameLen = nameLen; // Register the file name's length to the struct, so as to alloc enough memory
 	file->csvFile = calloc(nameLen, 1); // Allocate memory for the file name
 	
@@ -74,10 +77,14 @@ int prepareCsv(struct csv* file, const char* name, const short unsigned int name
 }
 
 // Function to calculate the file's size
-unsigned int calculateSize(FILE*data){
+unsigned int calculateSize(csv*file){
 	unsigned short int* start = malloc(2); // Points the start of the file
 	unsigned int* end = malloc(4); // Points the end of the file
 	unsigned int* size = malloc(4); // Stores the size of the file
+	
+	FILE*data;
+	
+	data = fopen(file->csvFile, "r");
 	
 	fseek(data, 0, SEEK_SET); // Set file position indicator to the start of the file
 	*start = ftell(data); // Save file's start pos
@@ -87,48 +94,53 @@ unsigned int calculateSize(FILE*data){
 	
 	*size = *(end) - *(start); // Substrack the value of start from the value of end to get the size
 	
-	free(start); // Deallocate start
-	start = NULL; // Null out start to prevent accidental usage
-	
-	free(end); // Deallocate end
-	end = NULL; // Null out end to prevent accidental usage
+	*size -= countLines(file); // New lines count as two bytes, 1 byte is substracted for each one to get the true size
 	
 	return *size; // Return the file's size
 }
 
-// Function to check if the intended seperator is valid to use
-bool isValidSep(const char sep){
-	if(sep <= 32)return false; // Invalid if sep is an unpressable char
-	if(sep >= 48 && sep <= 57) return false; // Invalid if sep is a number
-	if(sep >= 65 && sep <= 90)return false; // Invalid if sep is a capital letter
-	if(sep >= 97 && sep <= 122)return false; // Invalid if sep is a non-capital letter
-	return true;
+// Function to count the number of lines in file
+unsigned int countLines(csv*file){
+	 FILE*data; // File pointer
+	
+	 data = fopen(file->csvFile, "r"); // Open registered file
+	 char* read = malloc(1); // File reader to count new line characters, allocated 1 byte
+	 unsigned int*lines = malloc(4); // Variable to increment when a new line is read
+	 *lines = 0; // Set initial value to 0
+	 
+	 // Loop while end is not reached
+	 while(!feof(data)){
+		 *read = getc(data); // Read a character from data
+		 if(*read == 10 || *read == 13) ++(*lines); // Increment the value of lines if character is a line feed or carriage return
+	 }
+	 fclose(data); // Close the open file
+	 return *lines; // Return the amount of counted lines 
 }
 
 // Function to get csv file's length, seperator character and line of headers
-int preReading(struct csv* file, const char sep, unsigned int headline){
+int preReading(csv* file, const char sep, unsigned int headline){
 	// If the csv struct is not prepared beforehand
-	if(!file->isPrepared){
-		// Print message;
-		printf("Prepare file first.");
-		printf("Call prepareCsv(struct csv* file, const char* name, const short unsigned int nameLen)\n");
-		
-		return 1; // Exit with error code 1
-	}
+	if(!file->isPrepared) return 1; // Exit with error code 1
+	
 	FILE *data;
 	data = fopen(file->csvFile, "r"); // Open the file registered in the csv struct
 	
 	//Check if the file exists
-	if(data == NULL) return 2; // Exit with error code 2 if the file doesn't exist
+	if(data == NULL) return 2; // Exit with error code 2 if the file doesn't 
+	
+	// Counting lines of the file
+	file->lineNum = countLines(file);
 	
 	// Setting file->size
-	file->size = calculateSize(data); // Register the file's size into the csv struct	
-	
-	file->readyToRead = true; // Register into the csv struct that file is ready to read
+	file->size = 	calculateSize(file); // Register the file's size into the csv struct	
 	
 	// Seperator validation
-	if(!isValidSep(sep))return 3; // If seperator is invalid, exits with error code 3
+	if(!ispunct(sep))return 3; // If seperator is invalid, exits with error code 3
 	file->seperator = sep;
 	
+	if(headline > countLines(file) + 1 || headline < 0)return 4; // If header line data is invalid, exit with error code 4
+	file->headerLine = headline;
+	
+	file->readyToRead = true; // Register into the csv struct that file is ready to read
 	return 0;
 }
