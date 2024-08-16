@@ -42,7 +42,7 @@ int getLine(csv*file, unsigned int lineNum, void*saveto); // Extracts a singular
 * 1 : Invalid line number. Line number is either 0 or greater than the number of lines in the CSV file
 */
 int getHeaders(csv*file); // Extracts header data
-char** getLines(csv*file, unsigned int startLine, unsigned int endLine); // Extracts data between lines (inclusive)
+int getLines(csv*file, unsigned int startLine, unsigned int endLine, void*saveto); // Extracts data between lines (inclusive)
 
 int main(){
 	csv myCsv; // Sample Structure
