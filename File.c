@@ -56,9 +56,10 @@ int main(){
 	// Test log for preReading
 	preReading(&myCsv, ';', 0);
 	char str[200];
-
-	getLines(&myCsv, 2, 4, str);
-	printf("%s\n%lu\n", myCsv.headers, getLineLen(&myCsv, 1));
+	
+	getHeaders(&myCsv);
+	getLines(&myCsv, 2, 3 , str);
+	printf("%s\n%lu\n", myCsv.headers, getLineLen(&myCsv, 2));
 }
 
 // Function to get a line's length
@@ -81,15 +82,16 @@ unsigned long long getLineLen(csv*file, unsigned int lineNum){
 	}
 
 	read = getc(data); // Read the first char of the reached line (lineNum-th line)
-	unsigned int lineLen = 0; // Variable to store this line's length
+	unsigned long lineStart = ftell(data);
+	 
 	
 	while(read != 10 && read != 13 && read != 0 && !feof(data)){
 		read = getc(data); // Continue reading from the file char by char
-		++lineLen; // Increment lineLen for every character read
 	}
+	unsigned long lineEnd = ftell(data);
 	
 	fclose(data);
-	return lineLen;
+	return (lineEnd - lineStart);
 }
 
 // Function to write the csv file's name into the pointed csv struct
@@ -280,21 +282,35 @@ int getHeaders(csv*file){
 
 // Function to extract data between lines (inclusive)
 int getLines(csv*file, unsigned int startLine, unsigned int endLine, void*saveto){
-	unsigned long long totalSize = 0;
-	unsigned int index = 0;
+	unsigned long long totalSize = 0; // Total size of the data between the lines
+	unsigned int index = 0; // Variable for loops below
+	unsigned long maxLineLen = 0; // Highest line length
+	unsigned long currentLen; // Lenght of the current line
 	
-	while(index < endLine){
-		totalSize += getLineLen(file, index);
-		++index;
+	// Loop for calculating the max line length and the total size
+	for(index = startLine; index <= endLine; ++index){
+		currentLen = getLineLen(file, index); // currentLen is set as the index-th line's length
+		totalSize += currentLen; // Add currentLen to totalSize
+		if(maxLineLen < currentLen) maxLineLen = currentLen; // If the length of this line is greater than maxLineLen, maxLineLen is current line's length
 	}
-	printf("%lu\n", totalSize);
 	
-	char outputString[totalSize + 1];
-	outputString[totalSize] = '\0';
+	char outputString[totalSize + 1]; // String to be saved
+	outputString[totalSize] = '\0'; // Last char of outputString is NULL, denoting the string is finished
+	char buffer[maxLineLen]; // A buffer that gets the content of a single line at a time
+	unsigned int bufferCleaner; // Loop variable for emptying buffer
 	
-	unsigned int counter;
-	for(counter = 0; counter < endLine - startLine; ++counter){
+	// Loop until the last line is read
+	for(index = startLine; index <= endLine; ++index){
+		getLine(file, index, buffer); // Save the index-th line in buffer
+		strcat(outputString, buffer); // Append buffer to outputString
+		strcat(outputString, "\r\n"); // Append a carriage return and a line feed to outputString
 		
+		// Clean the buffer
+		for(bufferCleaner = 0; buffer[bufferCleaner] != 0; ++bufferCleaner)buffer[bufferCleaner] = '\0';
 	}
+	
+	printf("%s\n", outputString); // (Debugging) Print the outputString
+	memcpy(saveto, outputString, sizeof(outputString)); // Copy the outputString to the intended memory adress
+
 	return 0;
 }
