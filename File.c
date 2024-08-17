@@ -1,8 +1,10 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<string.h>
-#include<stdbool.h>
 #include<ctype.h>
+
+// Boolean enum
+typedef enum {false, true} bool;
 
 // CSV File Structure
 typedef struct csv {
@@ -24,6 +26,9 @@ typedef struct csv {
 } csv;
 
 // Function prototypes
+// Utility functions
+unsigned long long getLineLen(csv*file, unsigned int lineNumber);
+
 // Functions to prepare the csv struct
 int prepareCsv(csv* file, const char* name, const short unsigned int nameLen);
 int preReading(csv* file, const char sep, unsigned int headline);
@@ -52,8 +57,39 @@ int main(){
 	preReading(&myCsv, ';', 0);
 	char str[200];
 
-	getHeaders(&myCsv);
-	printf("%s", myCsv.headers);
+	getLines(&myCsv, 2, 4, str);
+	printf("%s\n%lu\n", myCsv.headers, getLineLen(&myCsv, 1));
+}
+
+// Function to get a line's length
+unsigned long long getLineLen(csv*file, unsigned int lineNum){
+	if(lineNum > file->lineNum || !lineNum)return 1; // Exit with error code 1
+
+	FILE*data;
+	data = fopen(file->csvFile, "r"); // Open Registered File
+
+	unsigned int currentLine = 1; // Variable to count lines
+	char read; // Variable to store chars read from the file
+
+	// Loop until program gets to the start of the intended line (lineNum)
+	while(currentLine < lineNum){
+		read = getc(data); // 1 char read from the file
+
+		if(read ==10 || read == 13){
+			++currentLine; // If the char is a new line or a carriage return, increment the currentLine
+		}
+	}
+
+	read = getc(data); // Read the first char of the reached line (lineNum-th line)
+	unsigned int lineLen = 0; // Variable to store this line's length
+	
+	while(read != 10 && read != 13 && read != 0 && !feof(data)){
+		read = getc(data); // Continue reading from the file char by char
+		++lineLen; // Increment lineLen for every character read
+	}
+	
+	fclose(data);
+	return lineLen;
 }
 
 // Function to write the csv file's name into the pointed csv struct
@@ -96,7 +132,8 @@ unsigned long long calculateSize(csv*file){
 	size = end - start; // Substrack the value of start from the value of end to get the size
 
 	size -= countLines(file); // New lines count as two bytes, 1 byte is substracted for each one to get the true size
-
+	
+	fclose(data);
 	return size; // Return the file's size
 }
 
@@ -238,5 +275,26 @@ int getHeaders(csv*file){
 	fclose(data);
 	outputString[lineLen] = '\0'; // Null character at the end to tell the program the string is finished	
 	strcpy(file->headers, outputString);
+	return 0;
+}
+
+// Function to extract data between lines (inclusive)
+int getLines(csv*file, unsigned int startLine, unsigned int endLine, void*saveto){
+	unsigned long long totalSize = 0;
+	unsigned int index = 0;
+	
+	while(index < endLine){
+		totalSize += getLineLen(file, index);
+		++index;
+	}
+	printf("%lu\n", totalSize);
+	
+	char outputString[totalSize + 1];
+	outputString[totalSize] = '\0';
+	
+	unsigned int counter;
+	for(counter = 0; counter < endLine - startLine; ++counter){
+		
+	}
 	return 0;
 }
