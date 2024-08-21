@@ -1,8 +1,13 @@
+#include<stdio.h>
+#include<stdlib.h>
+#include<string.h>
+
+// Boolean enum
+typedef enum {false, true} bool;
+
 // Sources for testing
 typedef struct csv {
-	// File name and related data
-	short unsigned int nameLen;
-	char* csvFile;
+	char* path;
 	bool isPrepared;
 
 	// Data about lines in CSV file
@@ -17,5 +22,7 @@ typedef struct csv {
 	char* headers;
 } csv;
 
-// Boolean enum
-typedef enum {false, true} bool;
+int isReadable(char*path);
+unsigned int countLines(char*path);
+
+int prepareFile(csv*file, char*path);
