@@ -1,0 +1,29 @@
+This file is the documentation for c-csv library's functions, structures and enums. This library is open for any legal use.
+|--------------------------------------------------------|
+  (int) isReadable(char*path)
+Purspose of the function :
+Checking if the file specified by (char*)path exists, so as to read from the file.
+
+How:
+Creates a file pointer (FILE*)file and opens the file specified with (char*)path in reading mode. Then, checks whether (FILE*)file == NULL.
+
+When:
+This function is automatically called anytime another function, which does reading, is called.
+
+Return Values :
+(FILE*)file == NULL => Returns 0
+(FILE*)file != NULL => Returns 1
+-----------------------
+  (int) countLines(char*path)
+Purpose of the function : 
+Counts how many lines the file, which is specified by the (char*)path.
+
+How :
+Initialises a variable which stores the number of line with the value of 1. From the start of the file, starts reading every character. When the character read is a line
+feed (ascii 10), adds 1 to the variable which stores the number of lines. Continues until the end of file is reached.
+
+When:
+
+Return Values : 
+isReadable(path) => Number of lines
+!isReadable(path) => 0 -> Error code for cases which the file is not readable
