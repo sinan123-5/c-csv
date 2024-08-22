@@ -1,5 +1,24 @@
-This file is the documentation for c-csv library's functions, structures and enums. This library is open for any legal use.
-|--------------------------------------------------------|
+This file is the documentation for c-csv library's functions, structures and enums. This file contains a mere brief explanation
+of the content of the library. Check sources.c for detailed information. This library is open for any legal use.
+|-------------------------ENUMS--------------------------|
+  enum bool
+An enum which takes either a true or a false as a value. Introduced as a replacement of <stdbool.h>.
+
+|----------------------STRUCTURES------------------------|
+  struct csv
+A structure which contains information about the CSV file which is being used by the program.
+
+Variables:
+(char*)path : Contains the file path of the CSV file.
+(bool)isPrepared : Checks if the prepareFile method was called on the structure.
+(unsigned int)lineNumber : Contains the number of lines the CSV file has.
+(unsigned int)headerLine : Contains which line the headers of the CSV file is written in.
+(char)seperator : Contains the character used to seperate the data which are in the same line.
+(bool)readyToread : Contains if the infoForReading method was called on the structure.
+(char*)headers : Contains the headers of the CSV file.
+(short unsigned int)headerNum : Contains how many headers the CSV file has.
+
+|-------------------------FUNCTIONS----------------------|
   (int) isReadable(char*path)
 Purspose of the function :
 Checking if the file specified by (char*)path exists, so as to read from the file.
@@ -23,7 +42,28 @@ Initialises a variable which stores the number of line with the value of 1. From
 feed (ascii 10), adds 1 to the variable which stores the number of lines. Continues until the end of file is reached.
 
 When:
+Called inside prepareFile function, so as to save its return value to (csv*)->lineNumber.
 
 Return Values : 
 isReadable(path) => Number of lines
 !isReadable(path) => 0 -> Error code for cases which the file is not readable
+-----------------------
+  (int) prepareFile(csv*file, char*path)
+Purpose of the function:
+Checks whether the CSV file is readable. If it is, it registers the file's path and number of lines into the structure 
+(file->path and file->lineNumber).
+
+How:
+Checks whether the file is readable. If it isn't, returns without executing any other code. If it is, it allocates memory for
+(char*)file->path just enough memory to store the argument passed to the function by (char*)path. Then, copies the argument
+(char*)path to (char*)file->path. Saves the number of lines in the CSV file by calling countLines method. Then, sets
+file->isPrepared to true.
+
+When:
+Must be called when a csv structure is created, or at least before any other functions are called using the aforementions csv
+structure. Or else, the other functions will return an error code.
+
+Return Values:
+isReadable(path) == 0 => 1 -> Error code
+Normally => 0
+-----------------------
