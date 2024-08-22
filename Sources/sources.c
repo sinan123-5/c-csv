@@ -30,6 +30,7 @@ int prepareFile(csv*file, char*path){
 	file->path = calloc(strlen(path) + 1, 1);
 	*(file->path + strlen(path)) = '\0';
 	strcpy(file->path, path);
+	file->lineNumber = countlines(file->path);
 	file->isPrepared = true;
 	return 0;
 }
@@ -37,7 +38,7 @@ int prepareFile(csv*file, char*path){
 int infoForReading(csv*file, unsigned int headerLine, char seperator){
 	if(!file->isPrepared)return 1;
 	if(!ispunct(seperator)) return 2;
-	if(headerLine <= 0 || headerLine > countLines(file->path)) return 3;
+	if(headerLine <= 0 || headerLine > file->lineNumber)) return 3;
 	if(file == NULL)return 4;
 	
 	file->headerLine = headerLine;
@@ -47,7 +48,7 @@ int infoForReading(csv*file, unsigned int headerLine, char seperator){
 
 int getLine(csv*file, unsigned int lineNumber, char*saveto, bool keepNewLine){
 	if(file == NULL) return 1;
-	if(lineNumber <= 0 || lineNumber > countLines(file->path)) return 2;
+	if(lineNumber <= 0 || lineNumber > file->lineNumber) return 2;
 	
 	FILE* csv = fopen(file->path, "r");
 	if(csv == NULL) return 3;

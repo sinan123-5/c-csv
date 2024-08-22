@@ -12,7 +12,7 @@ typedef struct csv {
 	bool isPrepared;
 
 	// Data about lines in CSV file
-	unsigned int lineNum;
+	unsigned int lineNumber;
 	unsigned int headerLine;
 	unsigned long long size;
 	char seperator;
