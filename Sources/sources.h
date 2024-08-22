@@ -1,6 +1,7 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<string.h>
+#include<ctype.h>
 
 // Boolean enum
 typedef enum {false, true} bool;
@@ -26,3 +27,6 @@ int isReadable(char*path);
 unsigned int countLines(char*path);
 
 int prepareFile(csv*file, char*path);
+int infoForReading(csv*file, unsigned int headerLine, char seperator);
+
+int getLine(csv*file, unsigned int lineNumber, char*saveto, bool keepNewLine);
