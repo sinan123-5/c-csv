@@ -25,8 +25,10 @@ typedef struct csv {
 
 int isReadable(char*path);
 unsigned int countLines(char*path);
+unsigned int getLineLength(char*path, unsigned int lineNumber, bool includeCarriageReturns);
 
 int prepareFile(csv*file, char*path);
 int infoForReading(csv*file, unsigned int headerLine, char seperator);
 
 int getLine(csv*file, unsigned int lineNumber, char*saveto, bool keepNewLine);
+int addLine(csv*file, unsigned int lineNumber, char*saveto, bool keepNewLine);
