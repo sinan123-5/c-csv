@@ -32,3 +32,5 @@ int infoForReading(csv*file, unsigned int headerLine, char seperator);
 
 int getLine(csv*file, unsigned int lineNumber, char*saveto, bool keepNewLine);
 int addLine(csv*file, unsigned int lineNumber, char*saveto, bool keepNewLine);
+
+int storeLinesInString(csv*file, unsigned int startLine, unsigned int endLine, char*saveto, bool keepNewLines);

@@ -159,3 +159,21 @@ int addLine(csv*file, unsigned int lineNumber, char*saveto, bool keepNewLine){
 	strcat(saveto, line);
 	return 0;
 }
+
+int storeLinesInString(csv*file, unsigned int startLine, unsigned int endLine, char*saveto, bool keepNewLines){
+	unsigned long totalLength = 0;
+	unsigned int currentLine;
+	for(currentLine = startLine; currentLine <= endLine; ++currentLine){
+		totalLength += getLineLength(file->path, currentLine, true);
+	}
+	
+	char output[totalLength + 1];
+	memset(output, 0, sizeof(output));
+	
+	for(currentLine = startLine; currentLine <= endLine; ++currentLine){
+		addLine(file, currentLine, output, keepNewLines);
+	}
+	realloc(output, 1);
+	output[totalLength + 1] = '\0';
+	printf("%s", output);
+}
